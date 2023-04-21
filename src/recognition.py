@@ -1,6 +1,6 @@
 import argparse
 import json
-from typing import Tuple, List
+from typing import Tuple, List, Any
 
 import cv2
 import editdistance
@@ -142,9 +142,7 @@ def infer(model: Model, fn_img: Path) -> None:
     img = preprocessor.process_img(img)
 
     batch = Batch([img], None, 1)
-    recognized, probability = model.infer_batch(batch, True)
-    print(f'Recognized: "{recognized[0]}"')
-    print(f'Probability: {probability[0]}')
+    return model.infer_batch(batch, True)
 
 
 def parse_args() -> argparse.Namespace:
@@ -163,8 +161,12 @@ def parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
+def recognize(image_path: Path) -> tuple[Any, Any]:
+    model = Model(char_list_from_file(), DecoderType.BestPath, must_restore=True)
+    recognized, probability = infer(model, image_path)
+    return recognized, probability
 
-def main():
+def main() -> None:
     """Main function."""
 
     # parse arguments and set CTC decoder
@@ -206,4 +208,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    recognize(Path("/home/jobkuzin/study/ml/TextRecognition/data/test.jpg"))
